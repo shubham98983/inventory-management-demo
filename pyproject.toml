@@ -1,0 +1,10 @@
+[project]
+name = "inventory-management"
+version = "0.1.0"
+description = "Inventory management REST API: products, stock, sales, alerts and reports"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
