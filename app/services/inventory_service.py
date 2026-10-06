@@ -4,7 +4,7 @@ from app.repositories import product_repo, stock_repo
 
 def is_low_stock(product):
     """A product is low on stock when its quantity is at or below its reorder level."""
-    return product.quantity < product.reorder_level
+    return product.quantity <= product.reorder_level
 
 
 def get_stock_status(product):
