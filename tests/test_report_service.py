@@ -1,6 +1,6 @@
-import pytest
 from datetime import datetime, timedelta
 
+from app.repositories import sale_repo
 from app.services import report_service
 
 
@@ -18,24 +18,20 @@ class TestSalesReport:
         assert report["start"] is None
         assert report["end"] is None
 
-    def test_sales_report_one_sale(self, ctx, app):
+    def test_sales_report_one_sale(self, ctx, make_product):
         """A single sale should be reported correctly."""
-        product = app.repositories.product_repo.create_product({
-            "name": "Test Product",
-            "sku": "TEST-001",
-            "price": 100.00,
-            "quantity": 10,
-        })
+        product = make_product(name="Test Product", sku="RPT-ONE", price=100.00)
 
         line_items = [
             {
-                "product_id": product["id"],
+                "product_id": product.id,
                 "quantity": 2,
-                "price": 100.00,
+                "unit_price": 100.00,
+                "discount_percent": 0,
             }
         ]
 
-        app.repositories.sale_repo.create_sale(
+        sale_repo.create_sale(
             user_id=1,
             subtotal=200.00,
             tax=20.00,
@@ -52,65 +48,59 @@ class TestSalesReport:
         assert report["start"] is None
         assert report["end"] is None
 
-    def test_sales_report_multiple_sales(self, ctx, app):
+    def test_sales_report_multiple_sales(self, ctx, make_product):
         """Multiple sales should be aggregated correctly."""
-        product1 = app.repositories.product_repo.create_product({
-            "name": "Product 1",
-            "sku": "PROD-001",
-            "price": 50.00,
-            "quantity": 20,
-        })
+        product1 = make_product(name="Product 1", sku="RPT-MULTI-1", price=50.00)
 
-        product2 = app.repositories.product_repo.create_product({
-            "name": "Product 2",
-            "sku": "PROD-002",
-            "price": 75.00,
-            "quantity": 15,
-        })
+        product2 = make_product(name="Product 2", sku="RPT-MULTI-2", price=75.00)
 
-        app.repositories.sale_repo.create_sale(
+        sale_repo.create_sale(
             user_id=1,
             subtotal=100.00,
             tax=10.00,
             total=110.00,
             line_items=[
                 {
-                    "product_id": product1["id"],
+                    "product_id": product1.id,
                     "quantity": 2,
-                    "price": 50.00,
+                    "unit_price": 50.00,
+                    "discount_percent": 0,
                 }
             ],
         )
 
-        app.repositories.sale_repo.create_sale(
+        sale_repo.create_sale(
             user_id=2,
             subtotal=150.00,
             tax=15.00,
             total=165.00,
             line_items=[
                 {
-                    "product_id": product2["id"],
+                    "product_id": product2.id,
                     "quantity": 2,
-                    "price": 75.00,
+                    "unit_price": 75.00,
+                    "discount_percent": 0,
                 }
             ],
         )
 
-        app.repositories.sale_repo.create_sale(
+        sale_repo.create_sale(
             user_id=1,
             subtotal=200.00,
             tax=20.00,
             total=220.00,
             line_items=[
                 {
-                    "product_id": product1["id"],
+                    "product_id": product1.id,
                     "quantity": 2,
-                    "price": 50.00,
+                    "unit_price": 50.00,
+                    "discount_percent": 0,
                 },
                 {
-                    "product_id": product2["id"],
+                    "product_id": product2.id,
                     "quantity": 1,
-                    "price": 75.00,
+                    "unit_price": 75.00,
+                    "discount_percent": 0,
                 },
             ],
         )
@@ -124,25 +114,21 @@ class TestSalesReport:
         assert report["start"] is None
         assert report["end"] is None
 
-    def test_sales_report_with_date_range(self, ctx, app):
+    def test_sales_report_with_date_range(self, ctx, make_product):
         """Sales report should support date-range filtering."""
-        product = app.repositories.product_repo.create_product({
-            "name": "Date Test Product",
-            "sku": "DATE-001",
-            "price": 100.00,
-            "quantity": 50,
-        })
+        product = make_product(name="Date Test Product", sku="RPT-DATE", price=100.00)
 
-        app.repositories.sale_repo.create_sale(
+        sale_repo.create_sale(
             user_id=1,
             subtotal=100.00,
             tax=10.00,
             total=110.00,
             line_items=[
                 {
-                    "product_id": product["id"],
+                    "product_id": product.id,
                     "quantity": 1,
-                    "price": 100.00,
+                    "unit_price": 100.00,
+                    "discount_percent": 0,
                 }
             ],
         )
@@ -160,27 +146,23 @@ class TestSalesReport:
 
         assert report["start"] == start
         assert report["end"] == end
-        assert report["order_count"] >= 0
+        assert report["order_count"] == 1
 
-    def test_sales_report_no_sales_in_date_range(self, ctx, app):
+    def test_sales_report_no_sales_in_date_range(self, ctx, make_product):
         """A date range with no sales should return zero values."""
-        product = app.repositories.product_repo.create_product({
-            "name": "Range Test Product",
-            "sku": "RANGE-001",
-            "price": 100.00,
-            "quantity": 10,
-        })
+        product = make_product(name="Range Test Product", sku="RPT-RANGE", price=100.00)
 
-        app.repositories.sale_repo.create_sale(
+        sale_repo.create_sale(
             user_id=1,
             subtotal=100.00,
             tax=10.00,
             total=110.00,
             line_items=[
                 {
-                    "product_id": product["id"],
+                    "product_id": product.id,
                     "quantity": 1,
-                    "price": 100.00,
+                    "unit_price": 100.00,
+                    "discount_percent": 0,
                 }
             ],
         )
