@@ -7,7 +7,7 @@ def sales_report(start=None, end=None):
     total_revenue = round(sum(sale["total"] for sale in sales), 2)
     total_tax = round(sum(sale["tax"] for sale in sales), 2)
     order_count = len(sales)
-    average_order_value = round(total_revenue / order_count, 2)
+    average_order_value = round(total_revenue / order_count, 2) if order_count else 0
     return {
         "start": start,
         "end": end,
