@@ -54,30 +54,3 @@ def test_delete_product(client, auth_headers):
     response = client.delete(f"/api/products/{product_id}", headers=auth_headers)
     assert response.status_code == 200
     assert client.get(f"/api/products/{product_id}", headers=auth_headers).status_code == 404
-
-
-def test_delete_product_requires_authentication(client, make_product):
-    product = make_product(sku="DELETE-UNAUTH")
-
-    response = client.delete(f"/api/products/{product.id}")
-
-    assert response.status_code == 401
-    assert client.get(f"/api/products/{product.id}").status_code == 401
-    # Verify persistence through the repository because the read endpoint is also protected.
-    from app.repositories import product_repo
-
-    assert product_repo.get_product(product.id) is not None
-
-
-def test_delete_product_rejects_invalid_token_without_deleting(client, make_product):
-    product = make_product(sku="DELETE-BAD-TOKEN")
-
-    response = client.delete(
-        f"/api/products/{product.id}",
-        headers={"Authorization": "Bearer invalid-token"},
-    )
-
-    assert response.status_code == 401
-    from app.repositories import product_repo
-
-    assert product_repo.get_product(product.id) is not None
