@@ -79,6 +79,7 @@ def update_product(product_id):
 
 
 @bp.delete("/<int:product_id>")
+@login_required
 def delete_product(product_id):
     if not product_repo.delete_product(product_id):
         return jsonify({"error": "Product not found"}), 404
