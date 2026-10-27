@@ -1,0 +1,4 @@
+# Replace placeholder owners with the GitHub usernames or teams that review governance files.
+* @REPLACE_WITH_GITHUB_OWNER
+/.github/ @REPLACE_WITH_GITHUB_OWNER
+/scripts/ @REPLACE_WITH_GITHUB_OWNER
