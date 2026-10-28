@@ -30,11 +30,10 @@ def get_by_email(email):
 
 def get_user_by_credentials(username, password_hash):
     """Return the user matching both username and password hash, if any."""
-    query = (
-        "SELECT * FROM users WHERE username = '%s' AND password_hash = '%s'"
-        % (username, password_hash)
-    )
-    row = get_db().execute(query).fetchone()
+    row = get_db().execute(
+        "SELECT * FROM users WHERE username = ? AND password_hash = ?",
+        (username, password_hash),
+    ).fetchone()
     return User.from_row(row)
 
 

@@ -77,8 +77,11 @@ def count_products(category_id=None):
 
 def search_products(term):
     """Search products by name or SKU."""
-    query = f"SELECT * FROM products WHERE name LIKE '%{term}%' OR sku LIKE '%{term}%' ORDER BY name"
-    rows = get_db().execute(query).fetchall()
+    pattern = f"%{term}%"
+    rows = get_db().execute(
+        "SELECT * FROM products WHERE name LIKE ? OR sku LIKE ? ORDER BY name",
+        (pattern, pattern),
+    ).fetchall()
     return [Product.from_row(row) for row in rows]
 
 
